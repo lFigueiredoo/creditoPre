@@ -4,8 +4,9 @@ import React, { useState } from "react";
 function App() {
   const [selectedArea, setSelectedArea] = useState("");
   const [courses, setCourses] = useState<string[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState("");
 
-  const data = {
+  const data: Record<string, string[]> = {
     "Tecnologia e informática": [
       "Web Designer",
       "Desenvolvedor Full Stack",
@@ -31,10 +32,16 @@ function App() {
       "Engenharia Civil",
     ],
   };
+
   const handleAreaChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const area = event.target.value;
     setSelectedArea(area);
-    setCourses(data[area] || []);
+    setCourses(area ? data[area] : []);
+    setSelectedCourse(""); // Resetar curso ao trocar área
+  };
+
+  const handleCourseChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCourse(event.target.value);
   };
 
   return (
@@ -49,8 +56,10 @@ function App() {
             name="área"
             className="w-full p-2 mb-[10px] border border-[#0000] text-inherit"
             onChange={handleAreaChange}
+            defaultValue=""
+            aria-label="Selecione uma área de estudo"
           >
-            <option value="" selected disabled hidden>
+            <option value="" disabled hidden>
               Selecione uma área
             </option>
             {Object.keys(data).map((area) => (
@@ -62,9 +71,12 @@ function App() {
           <select
             name="curso"
             className="w-full p-2 mb-[10px] border border-[#0000] text-inherit"
+            onChange={handleCourseChange}
+            value={selectedCourse}
             disabled={!selectedArea}
+            aria-label="Selecione um curso"
           >
-            <option value="" selected disabled hidden>
+            <option value="" disabled hidden>
               Selecione um curso
             </option>
             {courses.map((course) => (
