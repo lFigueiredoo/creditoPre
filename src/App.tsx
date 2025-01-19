@@ -1,10 +1,12 @@
 import "./App.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function App() {
   const [selectedArea, setSelectedArea] = useState("");
   const [courses, setCourses] = useState<string[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [countdown, setCountdown] = useState(900);
 
   const data: Record<string, string[]> = {
     "Tecnologia e informática": [
@@ -37,12 +39,42 @@ function App() {
     const area = event.target.value;
     setSelectedArea(area);
     setCourses(area ? data[area] : []);
-    setSelectedCourse(""); // Resetar curso ao trocar área
+    setSelectedCourse("");
   };
 
   const handleCourseChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCourse(event.target.value);
   };
+
+  const handleButtonClick = () => {
+    setIsModalOpen(true);
+    setCountdown(900);
+  };
+
+  useEffect(() => {
+    if (isModalOpen && countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isModalOpen, countdown]);
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const formatTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return {
+      hours: String(hours).padStart(2, "0"),
+      minutes: String(minutes).padStart(2, "0"),
+      seconds: String(seconds).padStart(2, "0"),
+    };
+  };
+
+  const { hours, minutes, seconds } = formatTime(countdown);
 
   return (
     <section className="w-screen h-screen relative bg-fundo2 bg-cover bg-center">
@@ -89,11 +121,38 @@ function App() {
         <button
           id="quero"
           type="button"
+          onClick={handleButtonClick}
           className="w-full p-[10px] text-[16px] font-normal text-white bg-[#c10024] hover:bg-[#666] border-none rounded-[20px]"
         >
           Quero minha bolsa!
         </button>
       </form>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
+          <div className="absolute top-4 bg-white text-black text-2xl px-4 py-2 rounded-md shadow-md">
+            Oferta termina em:
+            <div>
+              {hours} :{" "}
+              <span className="text-red-600 font-black">{minutes} </span>:{" "}
+              <span className="text-red-600 font-black">{seconds}</span>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h2 className="text-2xl font-bold mb-4">
+              Sua bolsa está quase garantida!
+            </h2>
+            <p>Finalize sua inscrição para garantir a bolsa de estudos.</p>
+            <button
+              onClick={closeModal}
+              className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
